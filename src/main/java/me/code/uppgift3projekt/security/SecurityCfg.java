@@ -1,40 +1,61 @@
 package me.code.uppgift3projekt.security;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.LogoutConfigurer;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+
 
 @EnableWebSecurity
 @Configuration
 public class SecurityCfg {
 
-//    @Bean
-//    public InMemoryUserDetailsManager userDetailsService(){
-//        UserDetails user = User.withUsername();
-//    }
+    PasswordEncoder passwordEncoder;
+
+    @Autowired
+    public SecurityCfg(PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
+    }
+
+
+    @Autowired
+    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+        auth
+                .inMemoryAuthentication()
+                .withUser("user").password(passwordEncoder.encode("password")).roles("USER");
+    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
 
-        return http
-                .csrf()
-                    .disable()
-                .authorizeHttpRequests((requests) -> requests
-                        .antMatchers("/", "/home").permitAll()
-                        .anyRequest().authenticated()
-                )
-                .formLogin((form) -> form
-                        .loginPage("/login")
-                        .permitAll()
-                )
-                .logout(LogoutConfigurer::permitAll)
-                .build();
+         http
+                .cors()
+                .and()
+                .csrf().disable()
+                .authorizeRequests((auth) -> {
+                    try {
+                        auth
+                                .antMatchers("/user/users", "/user/posts").authenticated()
+                                .antMatchers("/user/add").permitAll();
+                    }
+                    catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+
+                })
+                 .formLogin();
+
+        return http.build();
 
 
 

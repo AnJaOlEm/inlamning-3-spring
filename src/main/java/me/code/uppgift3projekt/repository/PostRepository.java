@@ -1,12 +1,10 @@
 package me.code.uppgift3projekt.repository;
 
 import me.code.uppgift3projekt.data.Post;
+import me.code.uppgift3projekt.data.User;
 import org.springframework.stereotype.Repository;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Repository
 public class PostRepository {
@@ -31,6 +29,19 @@ public class PostRepository {
 
     public Collection<Post> getAll() {
         return posts.values();
+    }
+
+    public Collection<Post> getAllByUser(User user) {
+
+        List<Post> userPosts = new ArrayList<>(Collections.emptyList());
+
+        for(Post post : posts.values()){
+            if(post.getCreator().equals(user)){
+                userPosts.add(post);
+            }
+        }
+
+        return userPosts;
     }
 
 }

@@ -6,18 +6,23 @@ import me.code.uppgift3projekt.exception.NotOwnerException;
 import me.code.uppgift3projekt.exception.PostAlreadyExistsException;
 import me.code.uppgift3projekt.exception.PostDoesNotExistException;
 import me.code.uppgift3projekt.repository.PostRepository;
-import me.code.uppgift3projekt.repository.UserRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.Collection;
+import java.util.Optional;
 
+@Service
 public class PostService {
 
     private final PostRepository repository;
+    private final UserService userService;
 
     @Autowired
-    public PostService(PostRepository repository) {
+    public PostService(PostRepository repository, UserService userService) {
         this.repository = repository;
+        this.userService = userService;
     }
 
     public Post create(User user, String title, String content)
@@ -66,5 +71,10 @@ public class PostService {
 
     public Collection<Post> getAll() {
         return repository.getAll();
+    }
+
+    public Collection<Post> getAllUserPosts(String username) {
+        Optional<User> user = userService.getUserByUsername(username);
+        return user.map(repository::getAllByUser).orElse(null);
     }
 }

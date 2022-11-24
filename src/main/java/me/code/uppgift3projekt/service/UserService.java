@@ -1,6 +1,5 @@
 package me.code.uppgift3projekt.service;
 
-import me.code.uppgift3projekt.data.Post;
 import me.code.uppgift3projekt.data.User;
 import me.code.uppgift3projekt.exception.UserAlreadyExistsException;
 import me.code.uppgift3projekt.repository.UserRepository;
@@ -12,6 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
+import java.util.Optional;
 
 @Service
 public class UserService implements UserDetailsService {
@@ -42,7 +42,7 @@ public class UserService implements UserDetailsService {
         if (existing.isPresent())
             throw new UserAlreadyExistsException();
 
-        var user = new User(username, passwordEncoder.encode(password));
+        var user = new User(username,passwordEncoder.encode(password));
         repository.save(user);
 
         return user;
@@ -52,7 +52,7 @@ public class UserService implements UserDetailsService {
         return repository.getAll();
     }
 
-    public User login(User user) {
-        return null;
+    public Optional<User> getUserByUsername(String username) {
+        return repository.getByUsername(username);
     }
 }
